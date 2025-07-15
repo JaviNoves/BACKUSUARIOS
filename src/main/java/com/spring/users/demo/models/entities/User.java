@@ -35,6 +35,9 @@ public class User {
             uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id","role_id"})})
     private List<Role> roles;
 
+    @Transient
+    private boolean admin;
+
     public Long getId() {
         return id;
     }
@@ -49,6 +52,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
     public String getPassword() {

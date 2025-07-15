@@ -44,7 +44,14 @@ public class UserServiceImpl implements UserService{
                 .map(existingUser -> {
                     existingUser.setUsername(userRequest.getUsername());
                     existingUser.setEmail(userRequest.getEmail());
-
+                    List<Role> roles = new ArrayList<>();
+                    roleRepository.findByName("ROLE_USER")
+                            .ifPresent(roles::add);
+                    if (userRequest.isAdmin()) {
+                        roleRepository.findByName("ROLE_ADMIN")
+                                .ifPresent(roles::add);
+                    }
+                    existingUser.setRoles(roles);
                     User saved = repository.save(existingUser);
                     return DtoMapperUser.builder()
                             .setUser(saved)
@@ -63,11 +70,20 @@ public class UserServiceImpl implements UserService{
     public UserDTO save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        Optional<Role> o = roleRepository.findByName("ROLE_USER");
+        Optional<Role> ou = roleRepository.findByName("ROLE_USER");
         List<Role> roles = new ArrayList<>();
-        if (o.isPresent()){
-            roles.add(o.orElseThrow());
+        if (ou.isPresent()){
+            roles.add(ou.orElseThrow());
         }
+
+        if (user.isAdmin()){
+            Optional<Role> oa = roleRepository.findByName("ROLE_ADMIN");
+            if (oa.isPresent()){
+                roles.add(oa.orElseThrow());
+            }
+        }
+
+
         user.setRoles(roles);
         return DtoMapperUser.builder().setUser(repository.save(user)).build();
     }
